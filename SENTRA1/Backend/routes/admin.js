@@ -1,6 +1,7 @@
 import express from "express";
 import Incident from "../models/Incident.js";
 import { protect, admin } from "../middleware/auth.js";
+import upload from "../config/multerCloudinary.js";
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const router = express.Router();
 router.get("/incidents", protect, admin, async (req, res) => {
   try {
     const { status, priority, category } = req.query;
-    
+
     // Build filter object
     const filter = {};
     if (status) filter.status = status;
@@ -24,7 +25,7 @@ router.get("/incidents", protect, admin, async (req, res) => {
 
     console.log(`✅ Admin: Fetched ${incidents.length} incidents`);
     console.log(`📎 Sample attachments:`, incidents[0]?.attachments?.length || 0);
-    
+
     res.json(incidents);
   } catch (err) {
     console.error("❌ Error fetching incidents:", err);
@@ -34,47 +35,86 @@ router.get("/incidents", protect, admin, async (req, res) => {
 
 /* =========================
    UPDATE INCIDENT (PATCH)
-   ⭐ UPDATED to use PATCH and handle multiple fields
+   ✅ Supports:
+   - status, priority
+   - admin note
+   - admin proof image upload (Cloudinary)
 ========================= */
-router.patch("/incidents/:id", protect, admin, async (req, res) => {
-  try {
-    const { status, priority, resolution, note } = req.body;
-    
-    const updateData = {};
-    if (status) updateData.status = status;
-    if (priority) updateData.priority = priority;
-    if (resolution) updateData.resolution = resolution;
-    
-    // Handle admin notes
-    if (note) {
+router.patch(
+  "/incidents/:id",
+  protect,
+  admin,
+  (req, res, next) => {
+    // Admin uploads proof images using same field name "attachments"
+    upload.array("attachments", 5)(req, res, (err) => {
+      if (err) {
+        console.error("UPLOAD ERROR:", err);
+        return res.status(400).json({
+          message: "File upload failed",
+          error: err.message,
+        });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    try {
+      const { status, priority, note } = req.body;
+
       const incident = await Incident.findById(req.params.id);
-      if (incident) {
+
+      if (!incident) {
+        return res.status(404).json({ message: "Incident not found" });
+      }
+
+      // ✅ Update fields
+      if (status) incident.status = status;
+      if (priority) incident.priority = priority;
+
+      // ✅ Admin note
+      if (note) {
         incident.adminNotes.push({
           note,
           addedBy: req.user._id,
-          addedAt: new Date()
+          addedAt: new Date(),
         });
-        await incident.save();
       }
-    }
-    
-    const incident = await Incident.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    ).populate("reportedBy", "name email");
 
-    if (!incident) {
-      return res.status(404).json({ message: "Incident not found" });
-    }
+      // ✅ Admin proof uploads (Cloudinary URLs)
+      const proofUploads = Array.isArray(req.files)
+        ? req.files.map((file) => ({
+            filename: file.originalname || "admin-proof",
+            path: file.path, // Cloudinary secure URL
+            uploadedAt: new Date(),
+          }))
+        : [];
 
-    console.log(`✅ Admin: Updated incident ${incident._id}`);
-    res.json(incident);
-  } catch (err) {
-    console.error("❌ Error updating incident:", err);
-    res.status(500).json({ message: "Server error" });
+      if (proofUploads.length > 0) {
+        // Ensure field exists
+        incident.adminProof = incident.adminProof || [];
+        incident.adminProof.push(...proofUploads);
+      }
+
+      // ✅ If resolved, set resolvedAt
+      if (status === "Resolved") {
+        incident.resolvedAt = Date.now();
+      }
+
+      await incident.save();
+
+      const updatedIncident = await Incident.findById(incident._id).populate(
+        "reportedBy",
+        "name email"
+      );
+
+      console.log(`✅ Admin: Updated incident ${updatedIncident._id}`);
+      res.json(updatedIncident);
+    } catch (err) {
+      console.error("❌ Error updating incident:", err);
+      res.status(500).json({ message: "Server error" });
+    }
   }
-});
+);
 
 /* =========================
    LEGACY ROUTES (Keep for backwards compatibility)
@@ -130,7 +170,7 @@ router.get("/analytics", protect, admin, async (req, res) => {
     const recentIncidents = await Incident.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("title referenceId category status");
+      .select("title referenceId category status priority createdAt");
 
     res.json({
       summary: { total, pending, inReview, resolved },

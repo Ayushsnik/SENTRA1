@@ -57,9 +57,7 @@ const AwarenessHub = () => {
   const filteredContent =
     selectedCategory === "all"
       ? AWARENESS_CONTENT
-      : AWARENESS_CONTENT.filter(
-          (item) => item.category === selectedCategory
-        );
+      : AWARENESS_CONTENT.filter((item) => item.category === selectedCategory);
 
   const getIcon = (category) => {
     switch (category) {
@@ -91,72 +89,106 @@ const AwarenessHub = () => {
     }
   };
 
+  const handleEmergencyCall = async () => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = "tel:112";
+    } else {
+      try {
+        await navigator.clipboard.writeText("112");
+      } catch (e) {
+        // ignore
+      }
+      alert(
+        "Emergency Number: 112\n\nDesktop dialer not supported.\nNumber copied to clipboard. Call from your phone."
+      );
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg p-8 text-white mb-6">
-        <div className="flex items-center space-x-3 mb-2">
-          <BookOpen size={36} />
-          <h1 className="text-3xl font-bold">Awareness Hub</h1>
-        </div>
-        <p className="text-blue-100">
-          Campus policies, safety guidelines, and important contacts
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f7f3ea]">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg p-8 text-white mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="flex items-center space-x-3 mb-2">
+                <BookOpen size={36} />
+                <h1 className="text-3xl font-bold">Awareness Hub</h1>
+              </div>
+              <p className="text-blue-100">
+                Campus policies, safety guidelines, and important contacts
+              </p>
+            </div>
 
-      {/* Category Filter */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
+            {/* Emergency Call Button */}
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                selectedCategory === cat
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
+              onClick={handleEmergencyCall}
+              className="inline-flex items-center justify-center gap-2 bg-white text-blue-700 px-5 py-3 rounded-lg font-semibold shadow hover:bg-blue-50 transition"
             >
-              {cat === "all" ? "All" : cat}
+              <Phone size={18} />
+              Call Emergency 112
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* Content Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {filteredContent.map((item) => {
-          const Icon = getIcon(item.category);
-          return (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition"
-            >
-              <div className="flex items-start space-x-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Icon className="text-blue-600" size={24} />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {item.title}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
-                        item.category
-                      )}`}
-                    >
-                      {item.category}
-                    </span>
+        {/* Category Filter */}
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  selectedCategory === cat
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {cat === "all" ? "All" : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {filteredContent.map((item) => {
+            const Icon = getIcon(item.category);
+            return (
+              <div
+                key={item.id}
+                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Icon className="text-blue-600" size={24} />
                   </div>
-                  <p className="text-gray-600 whitespace-pre-wrap">
-                    {item.content}
-                  </p>
+
+                  <div className="w-full">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {item.title}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${getCategoryColor(
+                          item.category
+                        )}`}
+                      >
+                        {item.category}
+                      </span>
+                    </div>
+
+                    <p className="text-gray-600 whitespace-pre-wrap">
+                      {item.content}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

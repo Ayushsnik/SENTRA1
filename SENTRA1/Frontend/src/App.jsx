@@ -1,23 +1,24 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-import Login from './components/Auth/Login';
-import Register from './components/Auth/Register';
-import StudentDashboard from './components/Student/Dashboard';
-import ReportIncident from './components/Student/ReportIncident';
-import MyReports from './components/Student/MyReports';
+import Login from "./components/Auth/Login";
+import Register from "./components/Auth/Register";
 
-import AdminDashboard from './components/Admin/AdminDashboard';
-import ManageReports from './components/Admin/ManageReports';
-import Analytics from './components/Admin/Analytics';
+import StudentDashboard from "./components/Student/Dashboard";
+import ReportIncident from "./components/Student/ReportIncident";
+import MyReports from "./components/Student/MyReports";
 
-import AwarenessHub from './components/Shared/AwarenessHub';
-import ProtectedRoute from './components/Shared/ProtectedRoute';
-import Layout from './components/Layout';
+import AdminDashboard from "./components/Admin/AdminDashboard";
+import ManageReports from "./components/Admin/ManageReports";
+import Analytics from "./components/Admin/Analytics";
+
+import AwarenessHub from "./components/Shared/AwarenessHub";
+import ProtectedRoute from "./components/Shared/ProtectedRoute";
+import Layout from "./components/Layout";
 
 function App() {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -30,19 +31,60 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+        {/* Protected Layout */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Role-based default redirect */}
+          <Route
+            index
+            element={
+              user?.role === "admin"
+                ? <Navigate to="/admin" replace />
+                : <Navigate to="/dashboard" replace />
+            }
+          />
 
-          {/* Student Routes */}
-          <Route path="dashboard" element={<StudentDashboard />} />
-          <Route path="report" element={<ReportIncident />} />
-          <Route path="my-reports" element={<MyReports />} />
+          {/* STUDENT ROUTES */}
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="report"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <ReportIncident />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="my-reports"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <MyReports />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="awareness" element={<AwarenessHub />} />
 
-          {/* Admin Routes */}
+          {/* ADMIN ROUTES */}
           <Route
             path="admin"
             element={
@@ -71,6 +113,7 @@ function App() {
           />
         </Route>
 
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

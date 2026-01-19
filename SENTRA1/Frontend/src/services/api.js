@@ -26,14 +26,14 @@ api.interceptors.request.use(
 export const authAPI = {
   register: (data) => api.post("/auth/register", data),
   login: (data) => api.post("/auth/login", data),
-  me: () => api.get("/auth/me"),
+  getMe: () => api.get("/auth/me"),
 };
 
 /* =========================
-   INCIDENTS (STUDENT)
+   INCIDENTS (USER)
 ========================= */
 export const incidentsAPI = {
-  // 🔥 IMPORTANT: multipart/form-data REQUIRED
+  // Create incident (multipart)
   create: (formData) =>
     api.post("/incidents", formData, {
       headers: {
@@ -41,7 +41,8 @@ export const incidentsAPI = {
       },
     }),
 
-  myReports: () => api.get("/incidents/my-reports"),
+  // ✅ FIXED: matches MyReports.jsx
+  getMyReports: () => api.get("/incidents/my"),
 
   getById: (id) => api.get(`/incidents/${id}`),
 
@@ -53,17 +54,12 @@ export const incidentsAPI = {
    ADMIN API
 ========================= */
 export const adminAPI = {
-  // ⭐ UPDATED: Use /admin/incidents (not /admin/reports)
-  getAllIncidents: (filters) => api.get("/admin/incidents", { params: filters }),
+  getAllIncidents: (filters) =>
+    api.get("/admin/incidents", { params: filters }),
 
-  // ⭐ UPDATED: Use PATCH (not PUT)
-  updateIncident: (id, data) => api.patch(`/admin/incidents/${id}`, data),
+  updateIncident: (id, data) =>
+    api.patch(`/admin/incidents/${id}`, data),
 
-  // Legacy endpoints (keep for backwards compatibility)
-  getAllReports: () => api.get("/admin/reports"),
-  updateStatus: (id, status) => api.put(`/admin/reports/${id}/status`, { status }),
-
-  // Analytics
   analytics: () => api.get("/admin/analytics"),
 };
 
