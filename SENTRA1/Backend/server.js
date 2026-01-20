@@ -1,9 +1,6 @@
 // 🔥 MUST BE FIRST LINE
 import "./config/loadenv.js";
 
-// import dotenv from "dotenv";
-// dotenv.config();
-
 import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
@@ -24,13 +21,17 @@ connectDB();
 // 🚀 APP INIT
 // ======================
 const app = express();
+app.set("trust proxy", 1);
 
 // ======================
 // 🌐 MIDDLEWARE
 // ======================
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ],
     credentials: true,
   })
 );
@@ -39,7 +40,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ======================
-// 📁 UPLOADS FOLDER (SAFE)
+// 🧪 HEALTH CHECK
+// ======================
+app.get("/", (req, res) => {
+  res.send("Sentra API is running");
+});
+
+// ======================
+// 📁 UPLOADS FOLDER
 // ======================
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads", { recursive: true });
