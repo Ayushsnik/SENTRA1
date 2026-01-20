@@ -24,29 +24,28 @@ const app = express();
 app.set("trust proxy", 1);
 
 // ======================
-// 🌐 CORS CONFIG (PRODUCTION SAFE)
+// 🌐 CORS (VERCEL SAFE)
 // ======================
 const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.FRONTEND_URL,
-].filter(Boolean); // removes undefined/null
+  "http://localhost:5173",          // local dev
+  process.env.FRONTEND_URL,         // vercel prod
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow server-to-server / postman / curl
+    origin: (origin, callback) => {
+      // allow server-to-server / curl / postman
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(
-        new Error(`CORS blocked for origin: ${origin}`),
-        false
-      );
+      return callback(new Error("CORS blocked"), false);
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -57,32 +56,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ======================
-// 🧪 HEALTH CHECKS
+// 🧪 HEALTH
 // ======================
 app.get("/", (req, res) => {
   res.send("✅ Sentra API is running");
 });
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
-
 // ======================
-// 📁 UPLOADS FOLDER
+// 📁 UPLOADS
 // ======================
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads", { recursive: true });
 }
 app.use("/uploads", express.static("uploads"));
-
-// ======================
-// 🧪 DEBUG (KEEP)
-// ======================
-console.log("Cloudinary ENV:", {
-  cloud: process.env.CLOUDINARY_CLOUD_NAME,
-  key: process.env.CLOUDINARY_API_KEY,
-  secret: process.env.CLOUDINARY_API_SECRET ? "OK" : "MISSING",
-});
 
 // ======================
 // 🛣 ROUTES
@@ -93,13 +79,11 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/awareness", awarenessRoutes);
 
 // ======================
-// ❌ GLOBAL ERROR HANDLER
+// ❌ ERROR HANDLER
 // ======================
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err.message);
-  res.status(500).json({
-    message: "Internal Server Error",
-  });
+  res.status(500).json({ message: err.message });
 });
 
 // ======================
