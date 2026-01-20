@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
-import { Shield, Mail, Lock, User, IdCard } from "lucide-react";
+import { Shield, Mail, Lock, User, CreditCard  } from "lucide-react";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -125,7 +125,7 @@ const Register = () => {
                   Student ID
                 </label>
                 <div className="relative">
-                  <IdCard
+                  <CreditCard
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                     size={18}
                   />

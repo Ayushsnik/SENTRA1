@@ -29,7 +29,7 @@ const Login = () => {
 
       // ✅ frontend redirect only (backend unchanged)
       if (loginType === "admin") navigate("/admin");
-      else navigate("/dashboard");
+      else navigate("/admin");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
