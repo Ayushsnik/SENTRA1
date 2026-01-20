@@ -1,11 +1,12 @@
 import axios from "axios";
 
-// 🔗 Backend base URL
+// 🔗 Backend base URL (Render)
 const API_BASE_URL = "https://sentra1.onrender.com/api";
 
 // 🌐 Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // ✅ important for CORS + future cookie auth
 });
 
 // 🔐 Attach JWT token automatically
@@ -13,6 +14,8 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
+      // ensure headers object exists
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -41,11 +44,8 @@ export const incidentsAPI = {
       },
     }),
 
-  // ✅ FIXED: matches MyReports.jsx
   getMyReports: () => api.get("/incidents/my"),
-
   getById: (id) => api.get(`/incidents/${id}`),
-
   trackByReference: (refId) =>
     api.get(`/incidents/reference/${refId}`),
 };
