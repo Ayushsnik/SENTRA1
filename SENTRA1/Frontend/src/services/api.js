@@ -1,11 +1,11 @@
 import axios from "axios";
 
 // 🔗 Backend base URL
-const API_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://sentra1.onrender.com/api";
 
 // 🌐 Axios instance
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
 });
 
 // 🔐 Attach JWT token automatically
