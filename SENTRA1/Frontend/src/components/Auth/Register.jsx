@@ -1,41 +1,37 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { toast } from 'react-toastify';
-import { Shield, Mail, Lock, User, Phone, Building } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
+import { Shield, Mail, Lock, User, IdCard } from "lucide-react";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'student',
-    studentId: '',
-    department: '',
-    phone: '',
+    name: "",
+    email: "",
+    studentId: "",
+    password: "",
+    confirmPassword: "",
+    role: "student", // ✅ fixed student only
   });
+
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error("Passwords do not match");
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
@@ -43,186 +39,187 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...registerData } = formData;
+
       await register(registerData);
-      toast.success('Registration successful!');
-      navigate('/dashboard');
+      toast.success("Registration successful!");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <Shield className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800">Create Your Account</h1>
-          <p className="text-gray-600 mt-2">Join Sentra to report and track incidents</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+    <div className="min-h-screen bg-[#f7f3ea] flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        {/* SINGLE CARD */}
+        <div className="bg-[#fffdf7] border border-[#e8dfcf] rounded-2xl shadow-lg overflow-hidden">
+          {/* TOP STRIP */}
+          <div className="px-6 py-5 bg-[#fbf7ee] border-b border-[#eee3d3]">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-700 flex items-center justify-center shadow-sm">
+                <Shield className="text-white" size={26} />
+              </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <h1 className="text-xl font-extrabold text-gray-900">
+                  Student Registration
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Create your Sentra student account
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* BODY */}
+          <div className="px-6 py-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Full Name *
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="John Doe"
+                    placeholder="Your full name"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e8dfcf] bg-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
+              {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Mail
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="you@example.com"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e8dfcf] bg-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
+              {/* Student ID */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
+                  Student ID
+                </label>
+                <div className="relative">
+                  <IdCard
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    name="studentId"
+                    value={formData.studentId}
+                    onChange={handleChange}
+                    placeholder="e.g. ID123456"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e8dfcf] bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Password *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                   <input
                     type="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e8dfcf] bg-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
+              {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Confirm Password *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
                   <input
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e8dfcf] bg-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role *
-                </label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 bg-blue-700 text-white py-3 rounded-xl font-extrabold hover:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Creating Account..." : "Create Student Account"}
+              </button>
+            </form>
+
+            {/* Footer Link */}
+            <div className="mt-5 text-center">
+              <p className="text-sm text-gray-700">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-blue-700 font-extrabold hover:underline"
                 >
-                  <option value="student">Student</option>
-                  <option value="staff">Staff</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student/Staff ID
-                </label>
-                <input
-                  type="text"
-                  name="studentId"
-                  value={formData.studentId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="ID123456"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Department
-                </label>
-                <div className="relative">
-                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Computer Science"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+1234567890"
-                  />
-                </div>
-              </div>
+                  Sign in
+                </Link>
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-                Sign in
-              </Link>
-            </p>
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-600">
+                Only students can register here. Admin accounts are created by
+                the institution.
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Bottom Note */}
+        <p className="text-center text-xs text-gray-500 mt-5">
+          © {new Date().getFullYear()} Sentra • All rights reserved
+        </p>
       </div>
     </div>
   );

@@ -31,9 +31,10 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link
-            to="/dashboard"
-            className="flex items-center space-x-2 font-bold text-xl"
-          >
+  to={user?.role === "admin" ? "/admin" : "/dashboard"}
+  className="flex items-center space-x-2 font-bold text-xl"
+>
+
             <Shield className="h-8 w-8" />
             <span>Sentra</span>
           </Link>
